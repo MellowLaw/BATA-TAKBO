@@ -44,9 +44,6 @@ export class Boss {
     const gridCenterX = grid.offsetX + (grid.tileSize * grid.cols) / 2;
     this.projectileOriginX = gridCenterX;
     this.projectileOriginY = grid.offsetY - 30;
-
-    this.cheatMode = false; // Activated by the secret cheat code
-    
     // Chapter 2 ultimate attack tracking
     this._ch2UltimateActive = false;
     this._ch2UltimateCount = 0;
@@ -177,12 +174,6 @@ export class Boss {
       // Progressive difficulty for regular chapters
       // Scales from 1.0 (wave 1) to 1.5 (wave 20+) - attacks become 50% faster
       this.difficultyMultiplier = Math.min(1.0 + ((this.waveCount - 1) * 0.025), 1.5);
-    }
-
-    // --- CHEAT MODE: boss sleeps, double loot rains ---
-    if (this.cheatMode) {
-      this._executeCheatWave();
-      return;
     }
 
     let currentAttackDuration = 2000; // Baseline fallback
@@ -387,60 +378,6 @@ export class Boss {
         }
       }
     });
-  }
-
-  // ── Cheat wave: no attacks, doubled loot ───────────────────────────
-  _executeCheatWave() {
-    this.attackCycleCount++;
-    let duration = 2000;
-
-    // Spawn golden attack tile every 2 waves (double the normal rate)
-    // On the bonus run, spawn a second tile 600ms later for true doubling
-    if (this.waveCount % 2 === 0) {
-      this.spawnDamageTile();
-      this.scene.time.delayedCall(600, () => {
-        if (this.hp > 0) this.spawnDamageTile();
-      });
-      duration = 3500;
-    }
-
-    // DISABLED: Cheat wave chest spawning removed for rework
-    // if (this.attackCycleCount % 2 === 0 && this.grid.spawnChest) {
-    //   const gt = this.scene.goldenTile;
-    //   const freeSpots = [];
-    //   for (let r = 0; r < this.grid.rows; r++) {
-    //     for (let c = 0; c < this.grid.cols; c++) {
-    //       if (this.grid.cells[r][c].status === 'safe' &&
-    //         (c !== this.scene.player.col || r !== this.scene.player.row) &&
-    //         !(gt && gt.col === c && gt.row === r) &&
-    //         !this.grid.hasChestAt(c, r)) {
-    //         freeSpots.push({ c, r });
-    //       }
-    //     }
-    //   }
-    //   for (let i = 0; i < 2 && freeSpots.length > 0; i++) {
-    //     const idx = Phaser.Math.Between(0, freeSpots.length - 1);
-    //     const spot = freeSpots.splice(idx, 1)[0];
-    //     const roll = Math.random();
-    //     if (roll > 0.85) {
-    //       this.grid.spawnRuby(spot.c, spot.r);
-    //     } else if (roll > 0.70) {
-    //       this.grid.spawnDiamond(spot.c, spot.r);
-    //     } else {
-    //       let rarity = 0;
-    //       if (roll > 0.50) rarity = 8;
-    //       else if (roll > 0.40) rarity = 2;
-    //       else if (roll > 0.20) rarity = 1;
-    //       this.grid.spawnChest(spot.c, spot.r, rarity);
-    //     }
-    //   }
-    // }
-
-    // Schedule next cheat wave (faster cycle — 1s breather)
-    if (this.hp > 0) {
-      if (this.attackTimer) this.attackTimer.remove();
-      this.attackTimer = this.scene.time.delayedCall(duration + 1000, this.executeAttack, [], this);
-    }
   }
 
   // ================= CHAPTER 1 BLOOD MECHANICS =================

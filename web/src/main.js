@@ -25,6 +25,36 @@ import { LoadingScreen } from './screens/LoadingScreen.js';
 import { gestureController } from './gesture/GestureController.js';
 import { installBeforeUnloadGuard } from './utils/GuestGuard.js';
 
+// Global fetch interceptor to handle production cross-origin API routing
+(function setupFetchInterceptor() {
+  const originalFetch = window.fetch;
+  window.fetch = function (url, options = {}) {
+    if (typeof url === 'string' && (
+      url.startsWith('/auth') || 
+      url.startsWith('/api') || 
+      url.startsWith('/leaderboard') || 
+      url.startsWith('/admin') || 
+      url.startsWith('/health')
+    )) {
+      // Check if we are running locally or in production
+      const isLocal = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' || 
+                      window.location.hostname.startsWith('192.168.') || 
+                      window.location.hostname.startsWith('10.') || 
+                      window.location.hostname.endsWith('.local');
+      
+      if (!isLocal) {
+        const API_URL = import.meta.env.VITE_API_URL || 'https://batatakbo-api.duckdns.org';
+        url = `${API_URL}${url}`;
+      }
+      
+      // Force cross-origin credentials to ensure session cookies are sent/received
+      options.credentials = 'include';
+    }
+    return originalFetch(url, options);
+  };
+})();
+
 // Initialize screen manager
 const screenManager = new ScreenManager('screen-container');
 

@@ -134,7 +134,7 @@ router.post('/register', async (req, res) => {
       httpOnly: true,
       maxAge: 2592000000,
       secure: IS_PROD,
-      sameSite: 'lax'
+      sameSite: IS_PROD ? 'none' : 'lax'
     });
 
     return res.status(200).json({ success: true, message: 'Account created efficiently!' });
@@ -226,7 +226,7 @@ router.post('/login', loginLimiter, async (req, res) => {
         httpOnly: true,
         maxAge: 2592000000,
         secure: IS_PROD,
-        sameSite: 'lax'
+        sameSite: IS_PROD ? 'none' : 'lax'
       });
 
       let gameData = null;
@@ -306,7 +306,7 @@ router.post('/login/verify-mfa', async (req, res) => {
       httpOnly: true,
       maxAge: 2592000000,
       secure: IS_PROD,
-      sameSite: 'lax'
+      sameSite: IS_PROD ? 'none' : 'lax'
     });
 
     let gameData = null;
@@ -652,7 +652,7 @@ router.post('/change-username', authMiddleware, async (req, res) => {
       httpOnly: true,
       maxAge: 2592000000,
       secure: IS_PROD,
-      sameSite: 'lax'
+      sameSite: IS_PROD ? 'none' : 'lax'
     });
 
     return res.status(200).json({ success: true, username: trimmed });
@@ -747,7 +747,7 @@ router.post('/logout-all', authMiddleware, async (req, res) => {
     await db.run('UPDATE users SET invalidate_before = ? WHERE id = ?', [Date.now(), req.user.id]);
     const token = req.cookies.jwt;
     if (token) await blacklistToken(token);
-    res.clearCookie('jwt', { httpOnly: true, secure: IS_PROD, sameSite: 'lax' });
+    res.clearCookie('jwt', { httpOnly: true, secure: IS_PROD, sameSite: IS_PROD ? 'none' : 'lax' });
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('Logout all error:', err);
@@ -761,7 +761,7 @@ router.post('/logout', authMiddleware, async (req, res) => {
   res.clearCookie('jwt', {
     httpOnly: true,
     secure: IS_PROD,
-    sameSite: 'lax'
+    sameSite: IS_PROD ? 'none' : 'lax'
   });
   return res.status(200).json({ success: true });
 });
@@ -783,7 +783,7 @@ router.delete('/delete-account', authMiddleware, async (req, res) => {
 
     const token = req.cookies.jwt;
     if (token) await blacklistToken(token);
-    res.clearCookie('jwt', { httpOnly: true, secure: IS_PROD, sameSite: 'lax' });
+    res.clearCookie('jwt', { httpOnly: true, secure: IS_PROD, sameSite: IS_PROD ? 'none' : 'lax' });
 
     return res.status(200).json({ success: true, message: 'Account deleted successfully' });
   } catch (err) {
