@@ -121,11 +121,22 @@ export function isValidEmail(email) {
   return regex.test(trimmed) && trimmed.length <= 255;
 }
 
+// Robust 32-byte key derivation with backward-compatibility for correct hex keys
+function getKeyBuffer() {
+  try {
+    if (AES_SECRET_KEY && AES_SECRET_KEY.length === 64 && /^[0-9a-fA-F]+$/.test(AES_SECRET_KEY)) {
+      return Buffer.from(AES_SECRET_KEY, 'hex');
+    }
+  } catch (e) {}
+  // Hash any secret key value into a valid 32-byte key
+  return crypto.createHash('sha256').update(AES_SECRET_KEY || 'default-secret-key-fallback').digest();
+}
+
 // Cryptographic encryption helper using AES-256-GCM
 export function encryptData(text) {
   if (!text) return null;
   const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(AES_SECRET_KEY, 'hex'), iv);
+  const cipher = crypto.createCipheriv('aes-256-gcm', getKeyBuffer(), iv);
   let encrypted = cipher.update(text, 'utf8', 'base64');
   encrypted += cipher.final('base64');
   const authTag = cipher.getAuthTag().toString('base64');
@@ -142,7 +153,7 @@ export function decryptData(encryptedJson) {
   try {
     const parsed = JSON.parse(encryptedJson);
     if (parsed && parsed.iv && parsed.data && parsed.tag) {
-      const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(AES_SECRET_KEY, 'hex'), Buffer.from(parsed.iv, 'base64'));
+      const decipher = crypto.createDecipheriv('aes-256-gcm', getKeyBuffer(), Buffer.from(parsed.iv, 'base64'));
       decipher.setAuthTag(Buffer.from(parsed.tag, 'base64'));
       let decrypted = decipher.update(parsed.data, 'base64', 'utf8');
       decrypted += decipher.final('utf8');
