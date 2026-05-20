@@ -2,8 +2,8 @@
 # Bypasses CORS and enables secure session cookies by proxying requests to your EC2 API.
 # Replace https://api.yourdomain.com with your actual EC2 domain or public IP (e.g., https://your-ec2-ip)
 
-/auth/* https://api.yourdomain.com/auth/:splat 200
-/admin/* https://api.yourdomain.com/admin/:splat 200
-/leaderboard/* https://api.yourdomain.com/leaderboard/:splat 200
-/api/* https://api.yourdomain.com/api/:splat 200
-/health https://api.yourdomain.com/health 200
+/auth/* https://batatakbo-api.duckdns.org/auth/:splat 200
+/admin/* https://batatakbo-api.duckdns.org/admin/:splat 200
+/leaderboard/* https://batatakbo-api.duckdns.org/leaderboard/:splat 200
+/api/* https://batatakbo-api.duckdns.org/api/:splat 200
+/health https://batatakbo-api.duckdns.org/health 200
