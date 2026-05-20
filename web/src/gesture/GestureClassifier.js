@@ -234,7 +234,9 @@ export class GestureClassifier {
       const dataset = this.classifier.getClassifierDataset();
       const data = {};
       for (const [label, tensor] of Object.entries(dataset)) {
-        data[label] = Array.from(tensor.dataSync());
+        // Round floats to 4 decimal places to drastically compress JSON payload size
+        const rawArray = Array.from(tensor.dataSync());
+        data[label] = rawArray.map(v => Math.round(v * 10000) / 10000);
         data[label + '_shape'] = tensor.shape;
       }
       return data;
