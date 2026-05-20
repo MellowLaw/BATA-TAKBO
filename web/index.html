@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="Bata, Takbo! — A gesture-controlled boss-battle survival game. Dodge projectiles using your hand gestures!" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Bata Takbo" />
+
+  <!-- Security -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+  <title>Bata, Takbo!</title>
+
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/src/index.css" />
+</head>
+<body>
+  <!-- App Root — all screens render here -->
+  <div id="app">
+    <div id="screen-container"></div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading...</p>
+    </div>
+  </div>
+
+  <!-- Orientation Lock Screen -->
+  <div id="orientation-lock" class="orientation-lock hidden">
+    <div class="orientation-content">
+      <h2 class="orientation-title">PLS ROTATE YOUR DEVICE</h2>
+      <p class="orientation-message">FOR A MORE IMMERSIVE EXPERIENCE, USE A LANDSCAPE ORIENTATION</p>
+      <div class="orientation-animation">
+        <div class="phone-mockup">
+          <div class="phone-inner">
+            <span class="rotate-arrow">↻</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier" crossorigin="anonymous"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
