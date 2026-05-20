@@ -60,7 +60,13 @@ export async function blacklistToken(token) {
 // Authentication middleware
 export const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt;
+    let token = req.cookies.jwt;
+    if (!token && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
+      if (parts[0] === 'Bearer' && parts[1]) {
+        token = parts[1];
+      }
+    }
     if (!token) {
       return res.status(401).json({ error: 'Authentication required' });
     }

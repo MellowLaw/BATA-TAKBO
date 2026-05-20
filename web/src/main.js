@@ -50,6 +50,15 @@ import { installBeforeUnloadGuard } from './utils/GuestGuard.js';
       
       // Force cross-origin credentials to ensure session cookies are sent/received
       options.credentials = 'include';
+
+      // Inject Authorization header if JWT token is stored in localStorage
+      const token = localStorage.getItem('bata_takbo_jwt');
+      if (token) {
+        if (!options.headers) {
+          options.headers = {};
+        }
+        options.headers['Authorization'] = `Bearer ${token}`;
+      }
     }
     return originalFetch(url, options);
   };

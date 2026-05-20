@@ -248,7 +248,7 @@ router.post('/login', loginLimiter, async (req, res) => {
         } catch(e) { /* ignore */ }
       }
 
-      return res.status(200).json({ success: true, gameData });
+      return res.status(200).json({ success: true, token, gameData });
     } else {
       let attempts = user.failed_attempts + 1;
       let lockoutTime = 0;
@@ -328,7 +328,7 @@ router.post('/login/verify-mfa', async (req, res) => {
       } catch (e) { /* ignore */ }
     }
 
-    return res.status(200).json({ success: true, gameData });
+    return res.status(200).json({ success: true, token, gameData });
   } catch (err) {
     console.error('Login MFA verification error:', err);
     return res.status(500).json({ error: 'Internal server error' });

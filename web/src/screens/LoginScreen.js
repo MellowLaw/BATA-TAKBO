@@ -437,7 +437,6 @@ export const LoginScreen = {
         });
 
         const data = await res.json();
-
         if (res.ok && data.success && data.mfaRequired) {
           // MFA challenge — show verification card
           this._mfaTempToken = data.tempToken;
@@ -446,6 +445,9 @@ export const LoginScreen = {
           this.bindMfaVerifyEvents();
           return;
         } else if (res.ok && data.success) {
+          if (data.token) {
+            localStorage.setItem('bata_takbo_jwt', data.token);
+          }
           localStorage.setItem('guest_session', JSON.stringify({ is_guest: false, username }));
           await state.hydrateFromServer(true);
           if (window.__screenManager) {
@@ -1384,6 +1386,9 @@ export const LoginScreen = {
         const data = await res.json();
 
         if (res.ok && data.success) {
+          if (data.token) {
+            localStorage.setItem('bata_takbo_jwt', data.token);
+          }
           localStorage.setItem('guest_session', JSON.stringify({ is_guest: false, username: this._mfaUsername }));
           this._mfaTempToken = null;
           this._mfaUsername = null;

@@ -241,11 +241,11 @@ class StateManager {
       method: 'POST',
       credentials: 'include'
     }).catch((e) => console.warn('Logout request failed:', e));
-
     // ── Step 3: Clear local state ──────────────────────────────────────────
     sessionStorage.removeItem('admin_test_token');
     sessionStorage.removeItem('admin_test_mode');
     localStorage.removeItem('guest_session');
+    localStorage.removeItem('bata_takbo_jwt');
     try {
       localStorage.removeItem('bata_takbo_settings');
       localStorage.removeItem('bata_takbo_tutorial');
