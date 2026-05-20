@@ -137,7 +137,7 @@ router.post('/register', async (req, res) => {
       sameSite: IS_PROD ? 'none' : 'lax'
     });
 
-    return res.status(200).json({ success: true, message: 'Account created efficiently!' });
+    return res.status(200).json({ success: true, token, message: 'Account created efficiently!' });
   } catch (err) {
     if (err.message && err.message.includes('UNIQUE constraint')) {
       return res.status(400).json({ error: 'Username already taken.' });
@@ -473,7 +473,7 @@ router.get('/profile/endless-runs', authMiddleware, async (req, res) => {
 // Save game data
 router.post('/save-data', authMiddleware, async (req, res) => {
   try {
-    const { settings, tutorialComplete, gestureSetupComplete, chapterProgress, bestiary, gestureModel } = req.body;
+    const { settings, tutorialComplete, gestureSetupComplete, chapterProgress, gestureModel } = req.body;
     let existing = {};
     const db = getDb();
     try {
@@ -490,7 +490,6 @@ router.post('/save-data', authMiddleware, async (req, res) => {
       ...(tutorialComplete !== undefined ? { tutorialComplete } : {}),
       ...(gestureSetupComplete !== undefined ? { gestureSetupComplete } : {}),
       ...(chapterProgress !== undefined ? { chapterProgress } : {}),
-      ...(bestiary !== undefined ? { bestiary } : {}),
     };
 
     await db.run('UPDATE users SET game_data = ? WHERE id = ?', [encryptData(JSON.stringify(gameData)), req.user.id]);

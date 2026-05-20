@@ -45,9 +45,6 @@ export function hasMeaningfulGuestProgress() {
     if (progress.bestScores && Object.keys(progress.bestScores).length > 0) return true;
   }
 
-  const bestiary = state.get('bestiary');
-  if (bestiary && Object.keys(bestiary).length > 0) return true;
-
   return false;
 }
 

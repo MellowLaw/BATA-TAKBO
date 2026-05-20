@@ -1237,6 +1237,9 @@ export const LoginScreen = {
         let shouldEnable = false;
 
         if (res.ok && data.success) {
+          if (data.token) {
+            localStorage.setItem('bata_takbo_jwt', data.token);
+          }
           localStorage.removeItem('guest_session');
           localStorage.setItem('guest_session', JSON.stringify({ is_guest: false, username }));
           

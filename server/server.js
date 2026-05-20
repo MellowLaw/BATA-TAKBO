@@ -52,9 +52,9 @@ if (IS_PROD) {
   app.set('trust proxy', 1);
 }
 
-// Redirect to HTTPS in production
+// Redirect to HTTPS in production (skip OPTIONS preflight requests to avoid CORS issues)
 app.use((req, res, next) => {
-  if (IS_PROD && req.headers['x-forwarded-proto'] !== 'https') {
+  if (IS_PROD && req.method !== 'OPTIONS' && req.headers['x-forwarded-proto'] !== 'https') {
     return res.redirect(`https://${req.headers.host}${req.url}`);
   }
   next();
@@ -79,9 +79,28 @@ app.use(helmet({
 }));
 
 // CORS Configuration
+const allowedOrigins = [
+  'https://bata-takbo.pages.dev',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
 app.use(cors({
-  origin: IS_PROD ? process.env.FRONTEND_URL : 'http://localhost:5173',
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const cleanFrontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : '';
+    const isAllowed = allowedOrigins.includes(origin) || 
+                      origin.endsWith('.pages.dev') ||
+                      (cleanFrontendUrl && origin === cleanFrontendUrl);
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  optionsSuccessStatus: 200
 }));
 
 // Express body parsers & Cookie Parser

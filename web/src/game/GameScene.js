@@ -1745,23 +1745,6 @@ export class GameScene extends Phaser.Scene {
           // Persist to localStorage AND server (fire-and-forget; results screen does not depend on it)
           state.saveChapterProgress().catch(e => console.warn('Failed to save chapter progress:', e));
         }
-
-        // Unlock boss bestiary entry upon defeat
-        let bestiary = state.get('bestiary') || {};
-        const bossId = this.chapterId === 1 ? 'boss1' : (this.chapterId === 2 ? 'boss2' : 'boss3');
-        if (!bestiary[bossId]) bestiary[bossId] = { encountered: false, attacksSeen: [] };
-        
-        bestiary[bossId].encountered = true;
-        
-        // Reveal all attacks upon chapter clear
-        if (this.chapterId === 1) {
-            bestiary[bossId].attacksSeen = ['Scatter Shot', 'Column Drop', 'Row Sweep', 'Diagonal Rain', 'Center Blast'];
-        } else if (this.chapterId === 2) {
-            bestiary[bossId].attacksSeen = ['Beeswarm', 'Pollen Burst', 'Strangling Vines', 'Carrot Rain', 'Exploding Seeds', 'Snapping Flora', 'Acid Spitter', 'Golem Quake Notes', 'Note Burst Spiral', 'Bunny Stampede'];
-        }
-        
-        state.set('bestiary', bestiary);
-        state.saveBestiary();
       }
 
       state.set('lastGameResult', {

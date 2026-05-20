@@ -14,7 +14,6 @@ class StateManager {
       tutorialComplete: this._loadTutorialState(),
       gestureSetupComplete: this._loadGestureSetupState(),
       practiceTutorialComplete: this._loadPracticeTutorialState(),
-      bestiary: this._loadBestiary(),
       chapterProgress: this._loadChapterProgress(),
     };
     this._listeners = new Map();
@@ -177,13 +176,7 @@ class StateManager {
     } catch (e) { /* ignore */ }
   }
 
-  _loadBestiary() {
-    try {
-      const saved = localStorage.getItem('bata_takbo_bestiary');
-      if (saved) return JSON.parse(saved);
-    } catch (e) { /* ignore */ }
-    return {};
-  }
+
 
   _loadChapterProgress() {
     try {
@@ -200,14 +193,6 @@ class StateManager {
     } catch (e) { /* ignore */ }
   }
 
-
-
-  async saveBestiary(sync = true) {
-    try {
-      localStorage.setItem('bata_takbo_bestiary', JSON.stringify(this._state.bestiary));
-      if (sync) await this._syncToServer();
-    } catch (e) { /* ignore */ }
-  }
 
   async saveChapterProgress(sync = true) {
     try {
@@ -249,7 +234,6 @@ class StateManager {
     try {
       localStorage.removeItem('bata_takbo_settings');
       localStorage.removeItem('bata_takbo_tutorial');
-      localStorage.removeItem('bata_takbo_bestiary');
       localStorage.removeItem('bata_takbo_progress');
     } catch(e) {}
 
@@ -269,7 +253,6 @@ class StateManager {
     this._state.tutorialComplete = false;
     this._state.gestureSetupComplete = false;
     this._state.practiceTutorialComplete = false;
-    this._state.bestiary = {};
     this._state.chapterProgress = { chaptersUnlocked: [1], chaptersCompleted: [], bestScores: {} };
 
 
@@ -329,7 +312,6 @@ class StateManager {
       gestureSetupComplete: this._state.gestureSetupComplete,
       practiceTutorialComplete: this._state.practiceTutorialComplete,
       chapterProgress: this._state.chapterProgress,
-      bestiary: this._state.bestiary,
     };
 
     // Only attach gestureModel if we actually have one to avoid wiping server data
@@ -362,7 +344,6 @@ class StateManager {
     this._state.gestureSetupComplete = false;
     this._state.practiceTutorialComplete = false;
     this._state.chapterProgress = { chaptersUnlocked: [1], chaptersCompleted: [], bestScores: {} };
-    this._state.bestiary = {};
     // settings deliberately not reset — user UI prefs persist across accounts on same device.
     // Also wipe localStorage so stale values never leak to a different account on the same device.
     try {
@@ -370,7 +351,6 @@ class StateManager {
       localStorage.removeItem('bata_takbo_gesture_setup');
       localStorage.removeItem('bata_takbo_practice_tutorial');
       localStorage.removeItem('bata_takbo_progress');
-      localStorage.removeItem('bata_takbo_bestiary');
     } catch(e) {}
   }
 
@@ -419,7 +399,6 @@ class StateManager {
       this.set('gestureSetupComplete', gestureSetupComplete);
 
       if (gameData.chapterProgress) this.set('chapterProgress', gameData.chapterProgress);
-      if (gameData.bestiary) this.set('bestiary', gameData.bestiary);
       if (gameData.settings) {
         this.set('settings', this._deepMerge(this._state.settings, gameData.settings));
       }
@@ -445,7 +424,6 @@ class StateManager {
         localStorage.setItem('bata_takbo_practice_tutorial', JSON.stringify(this._state.practiceTutorialComplete));
         localStorage.setItem('bata_takbo_gesture_setup', JSON.stringify(this._state.gestureSetupComplete));
         localStorage.setItem('bata_takbo_progress', JSON.stringify(this._state.chapterProgress));
-        localStorage.setItem('bata_takbo_bestiary', JSON.stringify(this._state.bestiary));
         localStorage.setItem('bata_takbo_settings', JSON.stringify(this._state.settings));
       } catch (e) { /* ignore */ }
 
