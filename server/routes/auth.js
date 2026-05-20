@@ -111,14 +111,7 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     const initialData = JSON.stringify({ registeredAt: Date.now() });
-    const iv = crypto.randomBytes(12);
-    const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(AES_SECRET_KEY, 'hex'), iv);
-    
-    let encryptedData = cipher.update(initialData, 'utf8', 'base64');
-    encryptedData += cipher.final('base64');
-    const authTag = cipher.getAuthTag().toString('base64');
-    const ivBase64 = iv.toString('base64');
-    const dbEncryptedString = JSON.stringify({ iv: ivBase64, data: encryptedData, tag: authTag });
+    const dbEncryptedString = encryptData(initialData);
 
     const randomIconNum = (Math.floor(Math.random() * 40) + 1).toString().padStart(2, '0');
     const defaultAvatar = `/assets/ui/User Profiles/Icons_${randomIconNum}.png`;
@@ -432,13 +425,11 @@ router.get('/profile', authMiddleware, async (req, res) => {
     let registeredAt = null;
     try {
       if (user.encrypted_data) {
-        const { iv, data, tag } = JSON.parse(user.encrypted_data);
-        const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(AES_SECRET_KEY, 'hex'), Buffer.from(iv, 'base64'));
-        decipher.setAuthTag(Buffer.from(tag, 'base64'));
-        let decrypted = decipher.update(data, 'base64', 'utf8');
-        decrypted += decipher.final('utf8');
-        const parsed = JSON.parse(decrypted);
-        registeredAt = parsed.registeredAt;
+        const decrypted = decryptData(user.encrypted_data);
+        if (decrypted) {
+          const parsed = JSON.parse(decrypted);
+          registeredAt = parsed.registeredAt;
+        }
       }
     } catch(e) {
       console.error('Failed to decrypt user data:', e);
