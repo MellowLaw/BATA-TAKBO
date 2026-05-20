@@ -230,22 +230,17 @@ class StateManager {
     } catch (e) {}
 
     if (isRegistered) {
-      await this._syncToServer(); // await so save completes before JWT is blacklisted
+      // Run final sync in background to prevent UI freeze if backend is sluggish
+      this._syncToServer().catch(() => {});
     } else {
-      try {
-        await fetch('/auth/guest-scores', { method: 'DELETE' });
-      } catch (e) {}
+      fetch('/auth/guest-scores', { method: 'DELETE' }).catch(() => {});
     }
 
     // ── Step 2: Invalidate JWT ─────────────────────────────────────────────
-    try {
-      await fetch('/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-    } catch (e) {
-      console.warn('Logout request failed:', e);
-    }
+    fetch('/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    }).catch((e) => console.warn('Logout request failed:', e));
 
     // ── Step 3: Clear local state ──────────────────────────────────────────
     sessionStorage.removeItem('admin_test_token');
@@ -264,9 +259,9 @@ class StateManager {
       localStorage.removeItem('bata_takbo_preset_avatar');
     } catch(e) {}
 
-    // Wipe IDB gesture model so it never bleeds to guest or a different account
+    // Wipe IDB gesture model in background so we transition instantly
     if (window.__gestureController) {
-      try { await window.__gestureController.resetAllGestures(); } catch(e) {}
+      window.__gestureController.resetAllGestures().catch(() => {});
     }
 
     // Reset in-memory state so it doesn't bleed to the next user
