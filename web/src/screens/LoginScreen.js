@@ -447,7 +447,7 @@ export const LoginScreen = {
           return;
         } else if (res.ok && data.success) {
           localStorage.setItem('guest_session', JSON.stringify({ is_guest: false, username }));
-          await state.hydrateFromServer();
+          await state.hydrateFromServer(true);
           if (window.__screenManager) {
             window.__screenManager.navigate('loading-screen', { target: 'main-menu' });
           }
@@ -1387,7 +1387,7 @@ export const LoginScreen = {
           localStorage.setItem('guest_session', JSON.stringify({ is_guest: false, username: this._mfaUsername }));
           this._mfaTempToken = null;
           this._mfaUsername = null;
-          await state.hydrateFromServer();
+          await state.hydrateFromServer(true);
           if (window.__screenManager) {
             window.__screenManager.navigate('loading-screen', { target: 'main-menu' });
           }

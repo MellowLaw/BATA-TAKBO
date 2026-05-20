@@ -311,7 +311,7 @@ class StateManager {
     return true;
   }
 
-  async _syncToServer() {
+  async _syncToServer(syncGesture = false) {
     if (this._isGuest()) {
       return;
     }
@@ -319,7 +319,7 @@ class StateManager {
     this.set('isAuthenticated', true);
 
     let gestureModel = null;
-    if (window.__gestureController && window.__gestureController.classifier) {
+    if (syncGesture && window.__gestureController && window.__gestureController.classifier) {
       const exported = window.__gestureController.classifier.exportData();
       // Only include if it has actual data — never overwrite server with null/empty
       if (exported && Object.keys(exported).length > 0) {
@@ -383,7 +383,7 @@ class StateManager {
    * has stored for this account. Called by LoginScreen after a successful
    * login to override anything that may have leaked from a previous session.
    */
-  async hydrateFromServer() {
+  async hydrateFromServer(isLoginTransition = false) {
     if (this._isGuest()) {
       return;
     }
@@ -402,8 +402,8 @@ class StateManager {
       const { gameData } = await res.json();
 
       if (!gameData) {
-        // Brand-new account — clear any leftover guest gesture model from IDB
-        if (window.__gestureController) {
+        // Brand-new account — clear any leftover guest gesture model from IDB only on login transition
+        if (isLoginTransition && window.__gestureController) {
           try { await window.__gestureController.resetAllGestures(); } catch(e) {}
         }
         return true;
@@ -436,9 +436,11 @@ class StateManager {
           console.error('[LOAD] failed to import gesture model:', e);
         }
       } else if (!gameData.gestureModel && window.__gestureController) {
-        // Account exists but has no saved gesture model — wipe IDB so stale
-        // gestures from another account or guest session don't bleed through.
-        try { await window.__gestureController.resetAllGestures(); } catch(e) {}
+        // Account exists but has no saved gesture model — wipe IDB only if this is a fresh login transition
+        // so stale gestures from another account or guest session don't bleed through.
+        if (isLoginTransition) {
+          try { await window.__gestureController.resetAllGestures(); } catch(e) {}
+        }
       }
 
       // Mirror to localStorage WITHOUT triggering another server round-trip.

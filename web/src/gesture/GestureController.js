@@ -158,7 +158,7 @@ class GestureController {
     state.set('gestureModelTrained', true);
     // Only sync to server when explicitly requested (e.g. on back/complete)
     if (syncToServer) {
-      try { await state._syncToServer(); } catch(e) {}
+      try { await state._syncToServer(true); } catch(e) {}
     }
   }
 
