@@ -359,7 +359,7 @@ export const LoginScreen = {
           state._resetAccountState();
 
           if (window.__screenManager) {
-            window.__screenManager.navigate('loading-screen', { target: 'main-menu' });
+            window.__screenManager.navigate('loading-screen', { target: 'main-menu' }, false);
           }
         }, 500);
       });
@@ -449,7 +449,7 @@ export const LoginScreen = {
           localStorage.setItem('guest_session', JSON.stringify({ is_guest: false, username }));
           await state.hydrateFromServer(true);
           if (window.__screenManager) {
-            window.__screenManager.navigate('loading-screen', { target: 'main-menu' });
+            window.__screenManager.navigate('loading-screen', { target: 'main-menu' }, false);
           }
         } else if (res.status === 403 && data.error === 'BANNED') {
           // BANNED OVERLAY
@@ -1243,7 +1243,7 @@ export const LoginScreen = {
           await state._syncToServer();
           
           if (window.__screenManager) {
-            window.__screenManager.navigate('loading-screen', { target: 'main-menu' });
+            window.__screenManager.navigate('loading-screen', { target: 'main-menu' }, false);
           }
         } else {
           errorMsg.textContent = data.error || 'Registration failed.';
@@ -1389,7 +1389,7 @@ export const LoginScreen = {
           this._mfaUsername = null;
           await state.hydrateFromServer(true);
           if (window.__screenManager) {
-            window.__screenManager.navigate('loading-screen', { target: 'main-menu' });
+            window.__screenManager.navigate('loading-screen', { target: 'main-menu' }, false);
           }
         } else if (res.status === 401) {
           msg.textContent = 'Session expired. Please log in again.';

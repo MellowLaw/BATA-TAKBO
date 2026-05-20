@@ -96,7 +96,7 @@ export function confirmGuestLeave({ onLeave, onConnect } = {}) {
       if (typeof onConnect === 'function') {
         onConnect();
       } else if (window.__screenManager) {
-        window.__screenManager.navigate('login-screen');
+        window.__screenManager.navigate('login-screen', {}, false);
       }
     } else if (action === 'leave') {
       if (typeof onLeave === 'function') onLeave();

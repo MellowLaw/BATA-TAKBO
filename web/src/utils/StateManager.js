@@ -284,7 +284,8 @@ class StateManager {
     this.set('user', null);
 
     if (window.__screenManager) {
-      window.__screenManager.navigate('login-screen');
+      window.__screenManager.history = [];
+      window.__screenManager.navigate('login-screen', {}, false);
     }
   }
 
