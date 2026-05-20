@@ -109,7 +109,7 @@ export const ResultsScreen = {
 
           ${isGesture ? `
           <!-- Full-screen kill cam background (gold/sepia tint) -->
-          <img id="kill-cam-bg" src="${imagesSrc[0] || ''}" style="
+          <img id="kill-cam-bg" src="" style="
             position: absolute; inset: 0;
             width: 100%; height: 100%;
             object-fit: cover;
