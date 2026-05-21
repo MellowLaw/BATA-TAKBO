@@ -18,6 +18,7 @@ export const AdminDashboard = {
             <button class="profile-tab-btn active" data-target="panel-dashboard">DASHBOARD</button>
             <button class="profile-tab-btn" data-target="panel-users">USERS</button>
             <button class="profile-tab-btn" data-target="panel-leaderboard">LEADERBOARD</button>
+            <button class="profile-tab-btn" data-target="panel-notifications">ANNOUNCEMENTS</button>
             <button class="profile-tab-btn" data-target="panel-tests">DEBUG & TESTS</button>
           </div>
 
@@ -147,6 +148,31 @@ export const AdminDashboard = {
               </div>
             </div>
 
+            <!-- ANNOUNCEMENTS PANEL -->
+            <div id="panel-notifications" class="profile-panel">
+              <h2 style="font-family:'VCR',sans-serif; color:#111; text-transform:uppercase; margin:0 0 var(--space-md) 0; font-size:var(--text-xl); border-bottom:2px solid #111; padding-bottom:4px;">Push Announcements</h2>
+              <p style="color:#555; font-size:var(--text-sm); margin-bottom:var(--space-md);">Send native push notification announcements to all players who have subscribed in their Settings.</p>
+              
+              <div style="background:rgba(255,255,255,0.3); border:2px solid #111; border-radius:6px; padding:var(--space-md); display:flex; flex-direction:column; gap:var(--space-sm);">
+                <div>
+                  <label style="display:block; font-family:'VCR',sans-serif; font-size:12px; color:#111; margin-bottom:4px; font-weight:bold;">Notification Title</label>
+                  <input id="push-title" type="text" placeholder="e.g., Bata Takbo Update! 🏃‍♂️" class="login-card__input" style="width:100%; box-sizing:border-box; background:rgba(0,0,0,0.05); color:#111; border-color:#111; padding: 10px; font-family:'VCR',monospace;" />
+                </div>
+                <div>
+                  <label style="display:block; font-family:'VCR',sans-serif; font-size:12px; color:#111; margin-bottom:4px; font-weight:bold;">Message Body</label>
+                  <textarea id="push-body" rows="3" placeholder="Write your announcement message here..." style="width:100%; box-sizing:border-box; background:rgba(0,0,0,0.05); color:#111; border:2px solid #111; border-radius:6px; font-family:'VCR',monospace; font-size:14px; padding:10px; resize:vertical; outline:none;"></textarea>
+                </div>
+                <div>
+                  <label style="display:block; font-family:'VCR',sans-serif; font-size:12px; color:#111; margin-bottom:4px; font-weight:bold;">Action URL Target (Optional)</label>
+                  <input id="push-url" type="text" placeholder="e.g., /leaderboard" class="login-card__input" style="width:100%; box-sizing:border-box; background:rgba(0,0,0,0.05); color:#111; border-color:#111; padding: 10px; font-family:'VCR',monospace;" />
+                </div>
+                
+                <button id="btn-send-push" style="border: 2px solid #111; color: #111; background: #e67e22; padding: var(--space-sm); font-family: 'VCR', sans-serif; font-weight:bold; cursor:pointer; margin-top:var(--space-xs); transition: all 0.2s ease;">
+                  <i class="fas fa-paper-plane" style="margin-right:6px;"></i> BROADCAST NOTIFICATION
+                </button>
+              </div>
+            </div>
+
             <!-- TESTS PANEL -->
             <div id="panel-tests" class="profile-panel">
               <h2 style="font-family:'VCR',sans-serif; color:#111; text-transform:uppercase; margin:0 0 var(--space-md) 0; font-size:var(--text-xl); border-bottom:2px solid #111; padding-bottom:4px;">Debug & Tests</h2>
@@ -212,6 +238,7 @@ export const AdminDashboard = {
           if (btn.dataset.target === 'panel-dashboard') this.loadDashboard();
           if (btn.dataset.target === 'panel-users') this.loadUsers();
           if (btn.dataset.target === 'panel-leaderboard') this.loadLeaderboard();
+          if (btn.dataset.target === 'panel-notifications') this.initNotificationsPanel();
         }
       });
     });
@@ -685,6 +712,57 @@ export const AdminDashboard = {
     if (isConfirm) {
       overlay.querySelector('#admin-modal-cancel').addEventListener('click', close);
     }
+  },
+  initNotificationsPanel() {
+    const pushBtn = this.container.querySelector('#btn-send-push');
+    const titleInput = this.container.querySelector('#push-title');
+    const bodyInput = this.container.querySelector('#push-body');
+    const urlInput = this.container.querySelector('#push-url');
+
+    if (!pushBtn) return;
+
+    // Remove any previous listener by replacing the button clone
+    const newPushBtn = pushBtn.cloneNode(true);
+    pushBtn.parentNode.replaceChild(newPushBtn, pushBtn);
+
+    newPushBtn.addEventListener('click', async () => {
+      const title = titleInput.value.trim();
+      const body = bodyInput.value.trim();
+      const url = urlInput.value.trim();
+
+      if (!title || !body) {
+        this._showAdminModal('ERROR', 'Notification Title and Message Body are required.');
+        return;
+      }
+
+      newPushBtn.disabled = true;
+      newPushBtn.textContent = 'BROADCASTING...';
+
+      try {
+        const res = await fetch('/api/notifications/broadcast', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, body, url })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          this._showAdminModal('BROADCAST SENT', `Success! Notification broadcasted.<br><br>${data.message || ''}`);
+          // Clear inputs
+          titleInput.value = '';
+          bodyInput.value = '';
+          urlInput.value = '';
+        } else {
+          this._showAdminModal('ERROR', data.error || 'Failed to send broadcast.');
+        }
+      } catch (err) {
+        this._showAdminModal('ERROR', 'Network error occurred while broadcasting.');
+      } finally {
+        newPushBtn.disabled = false;
+        newPushBtn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right:6px;"></i> BROADCAST NOTIFICATION';
+      }
+    });
   },
 
   handleTestAction(action) {
