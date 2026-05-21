@@ -136,7 +136,7 @@ export const MainMenu = {
     // Music lifecycle is intentionally managed by the button click handlers:
     //   • Play button  → _fadeOutMusic() already paused & nulled _bgMusic
     //   • Other buttons → music keeps playing in the background while the
-    //     player browses sub-menus (Spellbook, Settings, etc.)
+    //     player browses sub-menus (Settings, About, etc.)
     // Nothing to do here.
   },
 

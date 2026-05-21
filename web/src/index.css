@@ -2724,58 +2724,6 @@ a {
   }
 }
 
-/* === SPELLBOOK SCREEN === */
-.spellbook-screen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-image: url('/assets/ui/backgrounds/spellbook_background.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  padding: var(--space-xl);
-  padding-top: calc(var(--space-2xl) + var(--space-xl));
-}
-
-.spellbook-entries {
-  width: 100%;
-  max-width: 600px;
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.spellbook-entry {
-  background: var(--bg-panel);
-  border: 2px solid white;
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-  transition: all var(--transition-normal);
-}
-
-.spellbook-entry.locked {
-  opacity: 0.4;
-  filter: grayscale(0.6);
-}
-
-.spellbook-entry__boss-name {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  color: var(--accent-orange);
-  text-shadow: var(--glow-orange);
-  margin-bottom: var(--space-sm);
-}
-
-.spellbook-entry__desc {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.5;
-  font-style: italic;
-}
 
 /* === HOW TO PLAY SCREEN === */
 .how-to-play {
