@@ -565,7 +565,7 @@ export class HUDScene extends Phaser.Scene {
     if (this.control === 'keyboard') {
       // ── D-PAD (on-screen arrow buttons) ──────────────────────────────────
       const dpadW = bossBoxW - 8;
-      const dpadH = Math.min(Math.floor(dpadW * 2 / 3), availCamH);
+      const dpadH = Math.min(dpadW, availCamH);
       const dpadX = bossBoxBaseX + 4;
       const dpadY = camStartY + Math.floor((availCamH - dpadH) / 2);
       this._buildDpad(dpadX, dpadY, dpadW, dpadH);
@@ -720,7 +720,7 @@ export class HUDScene extends Phaser.Scene {
         const dpad = document.getElementById('game-dpad');
         if (dpad) {
           const dpadW = bbW - 8;
-          const dpadH = Math.min(Math.floor(dpadW * 2 / 3), availCamH);
+          const dpadH = Math.min(dpadW, availCamH);
           const dpadX = bbBaseX + Math.floor((bbW - dpadW) / 2);
           const dpadY = camStartY + Math.floor((availCamH - dpadH) / 2);
           dpad.style.left   = `${dpadX}px`;

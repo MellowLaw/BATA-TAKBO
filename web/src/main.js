@@ -166,7 +166,7 @@ document.addEventListener('click', (e) => {
 // Global mobile tap fix — forward touchend to click for all interactive elements
 // This eliminates the 300ms delay and tap-cancellation on mobile browsers
 (function mobileTapFix() {
-  const SELECTORS = 'button, .menu-btn, .back-btn, .gesture-dir-btn, .ch-flip-wrapper, .cs-item, .leaderboard-tab, .char-option, #icon-profile, .main-menu__logout-btn';
+  const SELECTORS = 'button, .menu-btn, .back-btn, .gesture-dir-btn, .ch-flip-wrapper, .cs-item, .leaderboard-tab, .char-option, #icon-profile, .main-menu__logout-btn, .toggle';
   let touchMoved = false;
 
   document.addEventListener('touchstart', () => { touchMoved = false; }, { passive: true });

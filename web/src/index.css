@@ -4429,11 +4429,12 @@ a {
   display: grid;
   grid-template-areas:
     ".    up    ."
-    "left down right";
+    "left .     right"
+    ".    down  .";
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
   gap: 4px;
-  padding: 0 0 16px 0;
+  padding: 0;
   background: transparent;
   pointer-events: auto;
   box-sizing: border-box;

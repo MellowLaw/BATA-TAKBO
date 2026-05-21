@@ -12,7 +12,7 @@ export const Settings = {
 
     return `
       <div class="settings-screen screen" id="settings-container">
-        <div class="settings-screen__content" id="settings-content-wrapper" style="background: transparent; border: none; box-shadow: none;">
+        <div class="settings-screen__content" id="profile-content-wrapper" style="background: transparent; border: none; box-shadow: none;">
 
           <!-- SIDEBAR NAVIGATION -->
           <div class="profile-sidebar">
@@ -246,7 +246,7 @@ export const Settings = {
             </div>
 
           </div> <!-- end profile-content-area -->
-        </div> <!-- end settings-content-wrapper -->
+        </div> <!-- end profile-content-wrapper -->
       </div>
     `;
   },
