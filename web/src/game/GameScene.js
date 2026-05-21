@@ -80,8 +80,8 @@ export class GameScene extends Phaser.Scene {
     // For practice tutorial, skip loading heavy boss assets (not needed for simple tutorial)
     if (!this.isPracticeTutorial) {
       if (this.chapterId === 1 || this.chapterId === 4) {
-        this.load.spritesheet('boss_idle', '/assets/entity/boss/chapter1/chapter-1-idle-sprite.png', { frameWidth: 576, frameHeight: 324 });
-        this.load.spritesheet('boss_ult_attack', '/assets/entity/boss/chapter1/chapter-1-attack-sprite.png', { frameWidth: 672, frameHeight: 378 });
+        this.load.spritesheet('boss_idle', '/assets/entity/boss/chapter1/chapter-1-idle-sprite.png', { frameWidth: 288, frameHeight: 162 });
+        this.load.spritesheet('boss_ult_attack', '/assets/entity/boss/chapter1/chapter-1-attack-sprite.png', { frameWidth: 336, frameHeight: 189 });
 
         // Phase 5: Dynamic Loading of Custom Blood/Gore Sequence Projectiles
         for (let i = 0; i <= 14; i++) {
@@ -254,8 +254,8 @@ export class GameScene extends Phaser.Scene {
       this.load.spritesheet('ch3_explosion_3d', '/assets/projectiles/chapter-3/EXPLOSIONS/explosion-3-d.png', { frameWidth: 192, frameHeight: 192 });
       } else {
         // Default fallback for future chapters - use Chapter 1 sprites
-        this.load.spritesheet('boss_idle', '/assets/entity/boss/chapter1/chapter-1-idle-sprite.png', { frameWidth: 672, frameHeight: 378 });
-        this.load.spritesheet('boss_cast', '/assets/entity/boss/chapter1/chapter-1-idle-sprite.png', { frameWidth: 672, frameHeight: 378 });
+        this.load.spritesheet('boss_idle', '/assets/entity/boss/chapter1/chapter-1-idle-sprite.png', { frameWidth: 288, frameHeight: 162 });
+        this.load.spritesheet('boss_cast', '/assets/entity/boss/chapter1/chapter-1-idle-sprite.png', { frameWidth: 288, frameHeight: 162 });
       }
     } // End of !isPracticeTutorial block - boss assets only needed for regular game
 

@@ -1,7 +1,7 @@
 // Service Worker — Bata, Takbo!
 // Network-first strategy — always serve fresh assets, cache only as offline fallback
 
-const CACHE_NAME = 'bata-takbo-v9';
+const CACHE_NAME = 'bata-takbo-v10';
 
 // Define core static assets to pre-cache on install for immediate offline playability
 const STATIC_ASSETS = [

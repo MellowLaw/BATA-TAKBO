@@ -3,6 +3,8 @@
  * Handles requesting permissions and providing the video stream.
  * Supports privacy mode (blacked out feed).
  */
+import { state } from '../utils/StateManager.js';
+
 export class CameraManager {
   constructor(videoElement) {
     this.video = videoElement;
@@ -13,13 +15,40 @@ export class CameraManager {
   async initialize() {
     if (this.isActive) return;
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    // Retrieve camera settings from StateManager
+    const settings = state.get('settings') || {};
+    const cameraSettings = settings.camera || {};
+    const quality = cameraSettings.quality || 'medium';
+    const deviceId = cameraSettings.deviceId || '';
+
+    // Map quality settings to resolutions (low = 320x240, medium = 640x480, high = 1280x720)
+    let width, height;
+    if (quality === 'low') {
+      width = { ideal: 320 };
+      height = { ideal: 240 };
+    } else if (quality === 'high') {
+      width = { ideal: 1280 };
+      height = { ideal: 720 };
+    } else {
+      // medium / default
+      width = { ideal: 640 };
+      height = { ideal: 480 };
+    }
+
+    const videoConstraints = {
+      width,
+      height,
+      facingMode: 'user',
+    };
+
+    if (deviceId) {
+      videoConstraints.deviceId = { ideal: deviceId };
+    }
+
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width:  { ideal: isMobile ? 320 : 640 },
-          height: { ideal: isMobile ? 240 : 480 },
-          facingMode: 'user',
-        },
+        video: videoConstraints,
         audio: false,
       });
       
