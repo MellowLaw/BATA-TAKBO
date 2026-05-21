@@ -125,6 +125,17 @@ export async function initDb() {
     )
   `);
 
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS game_sessions (
+      id               TEXT PRIMARY KEY,
+      user_id          INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      chapter_id       INTEGER NOT NULL,
+      start_time       BIGINT NOT NULL,
+      used             BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at       BIGINT NOT NULL
+    )
+  `);
+
   // ─── Indexes ──────────────────────────────────────────────────────────────
   // ─── Migrations ───────────────────────────────────────────────────────────
   await db.exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT`);
@@ -138,6 +149,7 @@ export async function initDb() {
   await db.exec(`CREATE INDEX IF NOT EXISTS idx_users_email         ON users(LOWER(email))`);
   await db.exec(`CREATE INDEX IF NOT EXISTS idx_inf_scores_user     ON inf_scores(user_id)`);
   await db.exec(`CREATE INDEX IF NOT EXISTS idx_inf_scores_chapter  ON inf_scores(chapter_id, control_type, score DESC)`);
+  await db.exec(`CREATE INDEX IF NOT EXISTS idx_game_sessions_user  ON game_sessions(user_id)`);
 
   // ─── Seed admin accounts from .env ────────────────────────────────────────
   try {

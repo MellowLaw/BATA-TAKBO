@@ -384,9 +384,10 @@ export const AdminDashboard = {
           ? dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
           : 'Unknown';
         const bannedStyle = u.banned ? 'text-decoration:line-through;color:#e74c3c;' : '';
+        const cheatLabel = u.cheat_score > 0 ? `<span style="color:#e74c3c; font-size:11px; cursor:help; margin-left:6px;" title="Cheat Score: ${Math.round(u.cheat_score)}. Reason: ${u.ban_reason || 'Suspicious Activity'}">⚠️ (${Math.round(u.cheat_score)})</span>` : '';
         html += `
           <div class="inf-stat-row admin-user-row" data-username="${u.username.toLowerCase()}" style="grid-template-columns: 2fr 3fr 1fr 1fr 1fr 2.5fr; background:${u.banned?'rgba(231,76,60,0.1)':'transparent'}">
-            <div style="font-weight:bold;${bannedStyle}">${u.username} ${u.is_admin ? '<span style="color:#f39c12">*</span>' : ''}</div>
+            <div style="font-weight:bold;${bannedStyle}">${u.username} ${u.is_admin ? '<span style="color:#f39c12">*</span>' : ''}${cheatLabel}</div>
             <div style="font-size:0.85em;word-break:break-all;">${u.email || '-'}</div>
             <div style="font-size:0.85em;">${joinDate}</div>
             <div style="font-weight:bold;">${u.games_played || 0}</div>
@@ -490,7 +491,7 @@ export const AdminDashboard = {
         endHtml += `
           <div class="inf-stat-row ${s.suspicious ? 'suspicious' : ''}" style="grid-template-columns: 0.5fr 2fr 2fr 1fr 1fr 1.5fr 1.5fr; ${s.suspicious?'background:rgba(231,76,60,0.1);border:1px solid #e74c3c;':''}">
             <div style="font-weight:bold;color:#888;">${i+1}</div>
-            <div style="font-weight:bold;">${s.username} ${s.suspicious?'<span style="color:#e74c3c;font-size:10px;">⚠️</span>':''}</div>
+            <div style="font-weight:bold;">${s.username} ${s.suspicious ? `<span style="color:#e74c3c; font-size:10px; cursor:help;" title="Cheat Score: ${Math.round(s.cheat_score || 0)}. Reason: ${s.ban_reason || 'Outlier score'}">⚠️</span>` : ''}</div>
             <div>CH${s.chapter_id}</div>
             <div style="font-weight:bold;color:#e67e22;">${s.waves_survived||0}</div>
             <div>${(s.score||0).toLocaleString()}</div>

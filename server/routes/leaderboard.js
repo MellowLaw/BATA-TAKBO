@@ -1,27 +1,151 @@
 import express from 'express';
+import crypto from 'crypto';
 import { getDb } from '../db.js';
 import { authMiddleware } from '../helpers.js';
 
 const router = express.Router();
 
+// Start endless mode game session
+router.post('/start-endless', authMiddleware, async (req, res) => {
+  try {
+    const { chapterId } = req.body;
+    if (!chapterId || ![1, 2, 3].includes(Number(chapterId))) {
+      return res.status(400).json({ error: 'Invalid or missing chapterId' });
+    }
+
+    const db = getDb();
+    
+    // Prune expired sessions older than 24 hours or already used of this user
+    const pruneTime = Date.now() - 24 * 60 * 60 * 1000;
+    await db.run('DELETE FROM game_sessions WHERE user_id = ? AND (used = TRUE OR created_at < ?)', [req.user.id, pruneTime]);
+
+    // Generate new sessionId
+    const sessionId = crypto.randomUUID();
+    const now = Date.now();
+
+    await db.run(
+      'INSERT INTO game_sessions (id, user_id, chapter_id, start_time, used, created_at) VALUES (?, ?, ?, ?, FALSE, ?)',
+      [sessionId, req.user.id, Number(chapterId), now, now]
+    );
+
+    return res.status(200).json({ success: true, sessionId });
+  } catch (err) {
+    console.error('Start endless session error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Submit Endless Mode score (registered users only)
 router.post('/endless', authMiddleware, async (req, res) => {
   try {
-    const { chapterId, score, wavesSurvived, survivalSeconds, controlType } = req.body;
+    const { chapterId, score, wavesSurvived, survivalSeconds, controlType, sessionId } = req.body;
     if (!chapterId || score == null || !controlType) return res.status(400).json({ error: 'Missing required fields' });
     if (![1, 2, 3].includes(Number(chapterId))) return res.status(400).json({ error: 'Invalid chapterId' });
     if (!['gesture', 'keyboard'].includes(controlType)) return res.status(400).json({ error: 'Invalid controlType' });
     if (typeof score !== 'number' || score < 0 || score > 99999999) return res.status(400).json({ error: 'Invalid score' });
 
     const db = getDb();
-    const user = await db.get('SELECT username, banned, is_admin FROM users WHERE id = ?', [req.user.id]);
+    const user = await db.get('SELECT username, banned, is_admin, cheat_score FROM users WHERE id = ?', [req.user.id]);
     if (!user || user.banned) return res.status(403).json({ error: 'Forbidden' });
     if (user.is_admin) return res.status(403).json({ error: 'Admin accounts cannot submit scores' });
 
+    let cheatScoreDelta = 0;
+    const reasons = [];
+
+    // --- 1. Session Verification ---
+    if (!sessionId) {
+      cheatScoreDelta += 40;
+      reasons.push('Score submitted without sessionId');
+    } else {
+      const session = await db.get('SELECT * FROM game_sessions WHERE id = ? AND user_id = ?', [sessionId, req.user.id]);
+      if (!session) {
+        cheatScoreDelta += 50;
+        reasons.push('No matching game session found');
+      } else if (session.used) {
+        cheatScoreDelta += 60;
+        reasons.push('Reused game session token');
+      } else if (Number(session.chapter_id) !== Number(chapterId)) {
+        cheatScoreDelta += 30;
+        reasons.push(`Session chapterId (${session.chapter_id}) mismatch with submitted chapterId (${chapterId})`);
+      } else {
+        // Mark session as used
+        await db.run('UPDATE game_sessions SET used = TRUE WHERE id = ?', [sessionId]);
+
+        // Verify elapsed time vs survivalSeconds
+        const elapsedSecs = (Date.now() - Number(session.start_time)) / 1000;
+        const survSecs = Number(survivalSeconds) || 0;
+        if (survSecs > elapsedSecs + 15) { // 15-second buffer for latency/loading/pause
+          cheatScoreDelta += 50;
+          reasons.push(`Impossible survival time: claimed ${survSecs}s but only ${Math.round(elapsedSecs)}s elapsed`);
+        }
+      }
+    }
+
+    // --- 2. Statistical Anomaly Detection ---
+    const survSecs = Number(survivalSeconds) || 0;
+    const waves = Number(wavesSurvived) || 0;
+
+    // A. Wave Speed (physically impossible to survive waves quicker than 3 seconds per wave on average)
+    if (waves > 5 && survSecs / waves < 3.0) {
+      cheatScoreDelta += 40;
+      reasons.push(`Impossible wave rate: survived ${waves} waves in ${survSecs}s (${(survSecs/waves).toFixed(2)}s/wave)`);
+    }
+
+    // B. Score Rate (impossible to accumulate more than 6,000 points per second of play)
+    if (survSecs > 5 && score / survSecs > 6000) {
+      cheatScoreDelta += 50;
+      reasons.push(`Impossible score accumulation rate: ${score} points in ${survSecs}s (${(score/survSecs).toFixed(2)} pts/s)`);
+    }
+
+    // C. Extreme limit bounds check
+    if (score > 5000000) {
+      cheatScoreDelta += 100;
+      reasons.push(`Score exceeds extreme threshold (5M): ${score}`);
+    }
+    if (waves > 500) {
+      cheatScoreDelta += 100;
+      reasons.push(`Waves survived exceeds extreme threshold (500): ${waves}`);
+    }
+
+    // --- 3. Process Anti-Cheat Flags & Potential Auto-Ban ---
+    let finalBanned = false;
+    if (cheatScoreDelta > 0) {
+      const newCheatScore = Math.min((user.cheat_score || 0) + cheatScoreDelta, 999);
+      console.warn(`[ANTI-CHEAT] Suspicious activity flagged for user ${user.username} (ID: ${req.user.id}). Delta: +${cheatScoreDelta}, New Cheat Score: ${newCheatScore}. Reasons: ${reasons.join(' | ')}`);
+      
+      const banReason = `Automated Anti-Cheat trigger: ${reasons.join(', ')}`;
+      if (newCheatScore >= 100) {
+        finalBanned = true;
+        await db.run(
+          'UPDATE users SET cheat_score = ?, banned = TRUE, ban_reason = ? WHERE id = ?',
+          [newCheatScore, banReason, req.user.id]
+        );
+        console.warn(`[ANTI-CHEAT] Auto-banned user ${user.username} (ID: ${req.user.id}) due to cheat score >= 100.`);
+      } else {
+        await db.run(
+          'UPDATE users SET cheat_score = ?, ban_reason = COALESCE(ban_reason, ?) WHERE id = ?',
+          [newCheatScore, banReason, req.user.id]
+        );
+      }
+    }
+
+    // Insert score regardless, so the admin sees the cheat attempt in the database/admin dashboard!
+    // But if auto-banned or flagged as suspicious, they are excluded from the public leaderboard ranking anyway (thanks to u.banned = FALSE filter)
     await db.run(
       'INSERT INTO inf_scores (user_id, username, chapter_id, score, waves_survived, survival_seconds, control_type, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [req.user.id, user.username, Number(chapterId), Math.floor(score), Math.floor(wavesSurvived) || 0, Math.floor(survivalSeconds) || 0, controlType, Date.now()]
     );
+
+    // If banned, return decoy success response but skip the leaderboard ranking query
+    if (finalBanned) {
+      return res.status(200).json({
+        success: true,
+        wavesRank: null,
+        scoreRank: null,
+        bestRank: null,
+        banned: true
+      });
+    }
 
     // Calculate user's best rank for waves leaderboard
     const wavesRankRow = await db.get(`

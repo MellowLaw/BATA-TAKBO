@@ -17,6 +17,7 @@ export class GameScene extends Phaser.Scene {
     this.character = data.character || 'male';
     this.control = data.control || 'keyboard'; // 'gesture' or 'keyboard'
     this.isEndless = data.isEndless || false;
+    this.sessionId = data.sessionId || null;
     this.isGameOver = false;
     this.chapterScore = 0; // Live score for regular chapters
     this.endlessScore = 0;
@@ -1709,7 +1710,8 @@ export class GameScene extends Phaser.Scene {
           wavesSurvived: this.endlessWaves,
           isEndless: true,
           control: this.control,
-          character: this.character
+          character: this.character,
+          sessionId: this.sessionId
         });
         if (window.__screenManager) window.__screenManager.navigate('results-screen', {}, false);
         return;

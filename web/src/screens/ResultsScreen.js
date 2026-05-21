@@ -470,7 +470,8 @@ export const ResultsScreen = {
           score: result.score,
           wavesSurvived: result.wavesSurvived || 0,
           survivalSeconds: result.timeSurvived,
-          controlType
+          controlType,
+          sessionId: result.sessionId
         })
       });
       console.log('[ResultsScreen] Server response status:', res.status);

@@ -168,7 +168,7 @@ router.post('/reset-progress', authMiddleware, adminMiddleware, async (req, res)
 router.get('/leaderboard', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const db = getDb();
-    const endlessScores = await db.all('SELECT s.id, s.user_id, s.username, s.chapter_id, s.score, s.waves_survived, s.survival_seconds, s.control_type, s.created_at, u.banned, u.cheat_score FROM inf_scores s JOIN users u ON s.user_id = u.id ORDER BY s.waves_survived DESC, s.score DESC');
+    const endlessScores = await db.all('SELECT s.id, s.user_id, s.username, s.chapter_id, s.score, s.waves_survived, s.survival_seconds, s.control_type, s.created_at, u.banned, u.cheat_score, u.ban_reason FROM inf_scores s JOIN users u ON s.user_id = u.id ORDER BY s.waves_survived DESC, s.score DESC');
 
     const flaggedEndless = endlessScores.map(s => {
       let suspicious = s.cheat_score > 50;

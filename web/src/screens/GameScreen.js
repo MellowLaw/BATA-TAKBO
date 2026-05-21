@@ -191,6 +191,26 @@ export const GameScreen = {
     state.set('selectedCharacter', character);
     state.set('selectedControl', control);
 
+    // Anti-cheat Game Session Initialization
+    let sessionId = null;
+    if (isEndless && state.get('isAuthenticated')) {
+      try {
+        const response = await fetch('/leaderboard/start-endless', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chapterId })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          sessionId = data.sessionId;
+          console.log('[Anti-Cheat] Game session established:', sessionId);
+        }
+      } catch (err) {
+        console.warn('[Anti-Cheat] Failed to establish game session:', err);
+      }
+    }
+
     // 1. Boot up ML Gestures only if gesture control was selected
     const pip = el.querySelector('#game-camera-pip');
     if (control === 'gesture') {
@@ -266,7 +286,7 @@ export const GameScreen = {
 
     // Add scenes manually ONCE with the correct data, preventing double-start
     this.game.events.on('ready', () => {
-      this.game.scene.add('GameScene', GameScene, true, { chapterId, isTutorial, isPracticeTutorial, isEndless, character, control });
+      this.game.scene.add('GameScene', GameScene, true, { chapterId, isTutorial, isPracticeTutorial, isEndless, character, control, sessionId });
       this.game.scene.add('HUDScene', HUDScene, false);
       // GameScene.create() will call scene.launch('HUDScene') when ready
     });
