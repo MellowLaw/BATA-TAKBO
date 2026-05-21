@@ -144,7 +144,7 @@ export class Boss {
 
     this.waveCount++;
     if (this.isInfMode) {
-      this.infSpeedMultiplier = Math.min(1.0 + (this.waveCount * 0.015), 2.5);
+      this.infSpeedMultiplier = Math.min(1.0 + (this.waveCount * 0.015), 4.0);
       this.infPerfectWave = true;
       this.scene.events.emit('inf:wave', this.waveCount, this.infSpeedMultiplier);
 
@@ -186,13 +186,15 @@ export class Boss {
       const targets = [];
       this.attackCycleCount++;
 
-      // Every 5th attack cycle, spawn a bawang (lives up) loot
-      if (this.attackCycleCount % 5 === 0) {
+      // Loot drops taper at high waves: interval grows with wave count so late game is starved of heals/buffs
+      const bawangInterval = 5 + Math.floor(this.waveCount / 20); // starts every 5, grows to every 10+ by wave 100
+      const chestInterval = 8 + Math.floor(this.waveCount / 15);  // starts every 8, grows to every 14+ by wave 100
+      if (this.attackCycleCount % bawangInterval === 0) {
         this._spawnBawangLoot();
       }
 
-      // Every 8th attack cycle, spawn a chest (power-up) loot
-      if (this.attackCycleCount % 8 === 0) {
+      // Every Nth attack cycle, spawn a chest (power-up) loot
+      if (this.attackCycleCount % chestInterval === 0) {
         this._spawnChestLoot();
       }
 
@@ -340,7 +342,7 @@ export class Boss {
       const baseBreather = this.isInfMode ? 2000 : 3000;
       // Scale breather: at 1.5x difficulty, breather is 1/1.5 = 0.67 of base (2s -> 1.33s or 3s -> 2s)
       const difficulty = this.isInfMode ? this.infSpeedMultiplier : this.difficultyMultiplier;
-      const scaledBreather = Math.max(1000, baseBreather / difficulty); // Min 1s breather
+      const scaledBreather = Math.max(500, baseBreather / difficulty); // Min 0.5s breather at very high difficulty
       this.attackTimer = this.scene.time.delayedCall(currentAttackDuration + scaledBreather, this.executeAttack, [], this);
     }
   }
@@ -359,7 +361,7 @@ export class Boss {
    * @param {number} minTime - Minimum warning time (default 800ms)
    * @returns {number} Scaled warning time
    */
-  scaleWarningTime(baseTime, minTime = 800) {
+  scaleWarningTime(baseTime, minTime = 450) {
     const difficulty = this.getDifficultyMultiplier();
     // At 1.5x difficulty, warning is 1/1.5 = 67% of base time
     return Math.max(minTime, Math.floor(baseTime / difficulty));

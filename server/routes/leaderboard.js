@@ -54,12 +54,12 @@ router.post('/endless', authMiddleware, async (req, res) => {
 
     // --- 1. Session Verification ---
     if (!sessionId) {
-      cheatScoreDelta += 40;
+      cheatScoreDelta += 10;
       reasons.push('Score submitted without sessionId');
     } else {
       const session = await db.get('SELECT * FROM game_sessions WHERE id = ? AND user_id = ?', [sessionId, req.user.id]);
       if (!session) {
-        cheatScoreDelta += 50;
+        cheatScoreDelta += 20;
         reasons.push('No matching game session found');
       } else if (session.used) {
         cheatScoreDelta += 60;
@@ -74,7 +74,7 @@ router.post('/endless', authMiddleware, async (req, res) => {
         // Verify elapsed time vs survivalSeconds
         const elapsedSecs = (Date.now() - Number(session.start_time)) / 1000;
         const survSecs = Number(survivalSeconds) || 0;
-        if (survSecs > elapsedSecs + 15) { // 15-second buffer for latency/loading/pause
+        if (survSecs > elapsedSecs + 30) { // 30-second buffer for latency/loading/gesture camera init
           cheatScoreDelta += 50;
           reasons.push(`Impossible survival time: claimed ${survSecs}s but only ${Math.round(elapsedSecs)}s elapsed`);
         }
@@ -85,8 +85,8 @@ router.post('/endless', authMiddleware, async (req, res) => {
     const survSecs = Number(survivalSeconds) || 0;
     const waves = Number(wavesSurvived) || 0;
 
-    // A. Wave Speed (physically impossible to survive waves quicker than 3 seconds per wave on average)
-    if (waves > 5 && survSecs / waves < 3.0) {
+    // A. Wave Speed (real minimum cycle is ~2.5s/wave at max 4.0x difficulty with 500ms breather floor; threshold set to 2.0 to absorb Math.floor rounding)
+    if (waves > 5 && survSecs / waves < 2.0) {
       cheatScoreDelta += 40;
       reasons.push(`Impossible wave rate: survived ${waves} waves in ${survSecs}s (${(survSecs/waves).toFixed(2)}s/wave)`);
     }
