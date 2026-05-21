@@ -538,7 +538,6 @@ export const AdminDashboard = {
   _showBanReasonModal(userId, onBanned) {
     const PRESET_REASONS = [
       'Cheating / Using hacks',
-      'Harassment or toxic behavior',
       'Inappropriate username',
       'Exploiting bugs / glitches',
       'Spam or advertising',
